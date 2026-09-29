@@ -2,7 +2,7 @@
 
 Bazaar rebuilds Amazon's core shopping loop: search, product, cart, checkout, orders and returns. It keeps what Amazon gets right and removes the parts that work against the shopper.
 
-- **Live:** _link added after deploy_
+- **Live:** https://amazonclone-theta-blush.vercel.app
 - **What I changed and why:** [PRODUCT.md](PRODUCT.md), with recon screenshots in [`recon/`](recon/)
 - **Agent logs:** [`.agent-logs/`](.agent-logs/), and how capture was set up: [CAPTURE-TEST.md](CAPTURE-TEST.md)
 
