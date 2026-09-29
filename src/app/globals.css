@@ -1,26 +1,58 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Bazaar palette: ink header, teal actions, marigold for the brand mark only */
+  --color-ink: #111827;
+  --color-ink-2: #1f2937;
+  --color-brand: #0e7c66;
+  --color-brand-dark: #0a5f4e;
+  --color-brand-soft: #e7f5f1;
+  --color-marigold: #f5b400;
+  --color-save: #067d62;
+  --color-alert: #b42318;
+  --color-page: #f3f4f6;
+  --color-line: #e5e7eb;
+  --color-muted: #6b7280;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-page);
+  color: #111827;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-brand text-white hover:bg-brand-dark;
+}
+
+@utility btn-secondary {
+  @apply btn border border-ink/15 bg-white text-ink hover:bg-page;
+}
+
+@utility btn-ghost {
+  @apply btn text-brand hover:bg-brand-soft;
+}
+
+@utility card {
+  @apply rounded-xl border border-line bg-white;
+}
+
+@utility input {
+  @apply w-full rounded-lg border border-ink/20 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20;
+}
+
+@utility link {
+  @apply text-brand hover:underline;
+}
+
+@keyframes slide {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
