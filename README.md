@@ -12,7 +12,8 @@ Bazaar rebuilds Amazon's core shopping loop: search, product, cart, checkout, or
 2. Open a product. It has one price, a delivery date, the return window, a comparison with similar items, and reviews you can filter by star rating.
 3. Add to cart. A drawer confirms it and you keep browsing. The cart shows the final total, including delivery.
 4. Check out and choose **Continue with the demo account**. Pick UPI, card or cash on delivery (card and UPI are simulated), then place the order.
-5. On **Your orders**, the tracking timeline advances with time. You can cancel before an order ships. On the older delivered demo order, you can return an item.
+5. Open **Ask Bazaar** from the header and try "Stock my kitchen for under ₹3,000" or, on a product page, "Is this worth it compared to similar ones?".
+6. On **Your orders**, the tracking timeline advances with time. You can cancel before an order ships. On the older delivered demo order, you can return an item.
 
 ## What's different from amazon.in
 
@@ -25,6 +26,7 @@ Bazaar rebuilds Amazon's core shopping loop: search, product, cart, checkout, or
 | Price shown twice, "-30%" off an M.R.P. | One price, with the saving shown in rupees |
 | Menu opens with Prime Video, Alexa, Fire TV | Navigation lists shopping categories only |
 | Buy it again / recent history below six banners | Your history comes first on the home page |
+| Rufus: generic prompts, text-heavy answers | Ask Bazaar: grounded in the catalog, knows the page and your cart, answers with live product cards and one-tap bundles |
 
 Full reasoning, and what was deliberately cut, is in [PRODUCT.md](PRODUCT.md).
 
@@ -40,6 +42,7 @@ Full reasoning, and what was deliberately cut, is in [PRODUCT.md](PRODUCT.md).
 
 ```bash
 npm install
+echo "ANTHROPIC_API_KEY=sk-ant-..." > .env.local   # optional: enables Ask Bazaar
 npm run dev   # http://localhost:3000
 ```
 

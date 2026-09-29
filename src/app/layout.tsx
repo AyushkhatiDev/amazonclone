@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import DeptNav from "@/components/DeptNav";
 import Footer from "@/components/Footer";
 import AddedDrawer, { Toast } from "@/components/AddedDrawer";
+import Assistant, { AskFab } from "@/components/Assistant";
 import { departments } from "@/lib/catalog";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -24,6 +25,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1">{children}</main>
         <Footer />
         <AddedDrawer />
+        <Assistant />
+        <AskFab />
         <Toast />
       </body>
     </html>

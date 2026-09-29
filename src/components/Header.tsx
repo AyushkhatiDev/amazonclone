@@ -7,6 +7,7 @@ import { MapPin, Search, ShoppingCart, ChevronDown, Package, Heart, LogOut, User
 import type { SearchIndexItem, Department } from "@/lib/catalog";
 import { useStore, useAccount, useHydrated } from "@/lib/store";
 import { formatINR } from "@/lib/pricing";
+import { AskButton } from "./Assistant";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
@@ -30,6 +31,7 @@ export default function Header({ departments }: { departments: Department[] }) {
           <SearchBox departments={departments} />
         </div>
         <div className="ml-auto flex items-center gap-1 md:ml-0">
+          <AskButton className="flex items-center gap-1.5 rounded-md px-2 py-2 text-marigold hover:bg-white/10" />
           <AccountMenu name={hydrated ? account?.name : undefined} />
           <Link href="/orders" className="hidden rounded-md px-2 py-1 leading-tight hover:bg-white/10 lg:block">
             <span className="block text-xs text-white/70">Returns</span>
