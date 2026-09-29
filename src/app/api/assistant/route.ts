@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { MODEL, SYSTEM_PROMPT, TOOLS, runTool, PageContext, contextBlock, ContextSnaps } from "@/lib/assistant";
+import { localAnswer } from "@/lib/localAssistant";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -31,9 +32,6 @@ function rateLimited(ip: string) {
 const isUserText = (m: Msg) => m.role === "user" && Array.isArray(m.content) && m.content.some((b) => b.type === "text");
 
 export async function POST(req: Request) {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return Response.json({ error: "Ask Bazaar isn't switched on for this deployment yet." }, { status: 503 });
-  }
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   if (rateLimited(ip)) return Response.json({ error: "You're asking faster than I can keep up. Try again in a few minutes." }, { status: 429 });
 
@@ -49,6 +47,9 @@ export async function POST(req: Request) {
   if (history.filter(isUserText).length >= MAX_USER_TURNS) {
     return Response.json({ error: "This chat has reached its limit. Start a new one to keep going." }, { status: 413 });
   }
+
+  // Default: the built-in engine (free, instant, catalog-only). Claude is used only if a key is configured.
+  if (!process.env.ANTHROPIC_API_KEY) return localResponse(message, context, history);
 
   const userTurn: Msg = {
     role: "user",
@@ -135,5 +136,32 @@ export async function POST(req: Request) {
     },
   });
 
+  return new Response(stream, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" } });
+}
+
+function localResponse(message: string, context: PageContext, history: Msg[]) {
+  const reply = localAnswer(message, context, history);
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event: object) => controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+      send({ t: "status", text: reply.status });
+      send({ t: "products", items: [...ContextSnaps(context), ...reply.products] });
+      // Stream in word-sized chunks so the reply reads in, the same as the model path.
+      for (const chunk of reply.text.match(/\S+\s*|\s+/g) ?? []) {
+        send({ t: "text", d: chunk });
+        await new Promise((r) => setTimeout(r, 8));
+      }
+      // Stored as a normal user/assistant pair, so follow-ups ("which one is cheaper?") can see what was shown.
+      send({
+        t: "done",
+        messages: [
+          { role: "user", content: [{ type: "text", text: message }] },
+          { role: "assistant", content: [{ type: "text", text: reply.text }] },
+        ],
+      });
+      controller.close();
+    },
+  });
   return new Response(stream, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" } });
 }

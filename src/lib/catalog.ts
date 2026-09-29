@@ -103,10 +103,17 @@ export function search(params: SearchParams) {
 
 export const discount = (p: Product) => (p.mrp - p.price) / p.mrp;
 
-export function similar(p: Product, n = 4) {
+// In broad categories the last tag says what an item actually is (mascara vs lipstick,
+// blender vs spatula); in narrow ones (smartphones, laptops) the category already does.
+const BROAD = new Set(["beauty", "kitchen-accessories", "groceries", "mobile-accessories", "sports-accessories", "home-decoration", "skin-care"]);
+export const kindOf = (p: Product) => (BROAD.has(p.category) ? p.tags[p.tags.length - 1] : p.category);
+
+/** Closest alternatives: same kind of item first, then nearest in price. */
+export function similar(p: Product, n = 4, sameKindOnly = false) {
+  const kind = kindOf(p);
   return products
-    .filter((x) => x.id !== p.id && x.category === p.category)
-    .sort((a, b) => Math.abs(a.price - p.price) - Math.abs(b.price - p.price))
+    .filter((x) => x.id !== p.id && x.category === p.category && (!sameKindOnly || kindOf(x) === kind))
+    .sort((a, b) => Number(kindOf(b) === kind) - Number(kindOf(a) === kind) || Math.abs(a.price - p.price) - Math.abs(b.price - p.price))
     .slice(0, n);
 }
 

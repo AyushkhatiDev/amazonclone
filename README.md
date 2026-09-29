@@ -27,7 +27,7 @@ Bazaar rebuilds Amazon's core shopping loop: search, product, cart, checkout, or
 | Menu opens with Prime Video, Alexa, Fire TV | Navigation lists shopping categories only |
 | Buy it again / recent history below six banners | Your history comes first on the home page |
 | "Price history" is a pill that links elsewhere | A verdict ("lowest in 90 days" / "higher than usual") next to the price, backed by a 90-day chart |
-| Rufus: generic prompts, text-heavy answers | Ask Bazaar: grounded in the catalog, knows the page and your cart, answers with live product cards and one-tap bundles |
+| Rufus: generic prompts, text-heavy answers | Ask Bazaar: grounded in the catalog, knows the page and your cart, answers with live product cards and one-tap bundles. It runs free, with no AI API needed |
 
 Full reasoning, and what was deliberately cut, is in [PRODUCT.md](PRODUCT.md).
 
@@ -43,7 +43,6 @@ Full reasoning, and what was deliberately cut, is in [PRODUCT.md](PRODUCT.md).
 
 ```bash
 npm install
-echo "ANTHROPIC_API_KEY=sk-ant-..." > .env.local   # optional: enables Ask Bazaar
 npm run dev   # http://localhost:3000
 ```
 
