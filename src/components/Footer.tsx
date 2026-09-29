@@ -21,7 +21,7 @@ export default function Footer() {
         <div className="flex flex-col gap-2">
           <p className="font-semibold text-white">About this project</p>
           <p>An amazon.in rebuild for the 8x assignment. Payments are simulated, and your data stays in this browser.</p>
-          <a href="https://github.com/Ayushkhatidev/amazonclone" className="hover:text-white">Source on GitHub</a>
+          <a href="https://github.com/AyushkhatiDev/amazonclone" className="hover:text-white">Source on GitHub</a>
         </div>
       </div>
     </footer>

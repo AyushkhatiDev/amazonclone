@@ -280,7 +280,7 @@ async function demoAccount(): Promise<Account> {
   };
   const returnable = products.filter((p) => p.returnDays >= 30);
   return {
-    name: "Ayush",
+    name: "Demo Shopper",
     email: DEMO_EMAIL,
     pwHash: await hash(DEMO_EMAIL, DEMO_PASSWORD),
     addresses: [address],
