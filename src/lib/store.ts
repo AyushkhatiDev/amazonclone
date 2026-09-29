@@ -4,7 +4,7 @@
 // Pages only talk to this store, so swapping it for a real API is a contained change.
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { snap, type Snap } from "./snap";
 
 export { snap, type Snap };
@@ -151,6 +151,10 @@ export const useStore = create<State & Actions>()(
         },
         signIn: async (email, password) => {
           const key = email.trim().toLowerCase();
+          if (key === DEMO_EMAIL && password === DEMO_PASSWORD && !get().accounts[key]) {
+            await get().signInDemo();
+            return null;
+          }
           const acc = get().accounts[key];
           if (!acc) return "No account found with that email.";
           if (acc.pwHash !== (await hash(key, password))) return "That password doesn't match.";
@@ -218,10 +222,9 @@ export const useStore = create<State & Actions>()(
 export const useAccount = () => useStore((s) => (s.session ? s.accounts[s.session] : undefined));
 
 /** localStorage is only readable after mount; render store-driven UI after this flips. */
+const noopSubscribe = () => () => {};
 export function useHydrated() {
-  const [ok, setOk] = useState(false);
-  useEffect(() => setOk(true), []);
-  return ok;
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
 }
 
 // ---- Order status is derived from time, so orders progress on their own ----
