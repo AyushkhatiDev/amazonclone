@@ -29,7 +29,7 @@ export default function AddedDrawer() {
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-label="Added to cart">
-      <div className="absolute inset-0 bg-ink/30" onClick={close} />
+      <div className="absolute inset-0 animate-fade-in bg-ink/30" onClick={close} />
       <aside className="absolute right-0 top-0 flex h-full w-full max-w-sm flex-col bg-white shadow-2xl animate-[slide_.2s_ease-out]">
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <span className="flex items-center gap-2 font-semibold text-save">

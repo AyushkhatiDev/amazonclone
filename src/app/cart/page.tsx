@@ -179,7 +179,7 @@ function ItemGrid({ items, actions }: { items: Snap[]; actions: (p: Snap) => Rea
   return (
     <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       {items.map((p) => (
-        <div key={p.id} className="text-sm">
+        <div key={p.id} data-product className="text-sm">
           <Link href={`/p/${p.slug}`} className="block rounded-xl bg-page p-2">
             <img src={p.thumbnail} alt="" className="aspect-square w-full object-contain" />
           </Link>

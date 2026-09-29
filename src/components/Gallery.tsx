@@ -32,9 +32,11 @@ export default function Gallery({ images, title }: { images: string[]; title: st
         onMouseLeave={() => setZoom(null)}
       >
         <img
+          key={images[active]}
+          data-fly
           src={images[active]}
           alt={title}
-          className="aspect-square w-full object-contain p-6 transition-transform duration-150"
+          className="aspect-square w-full animate-fade-in object-contain p-6 transition-transform duration-150"
           style={zoom ? { transform: "scale(1.8)", transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}
         />
       </div>

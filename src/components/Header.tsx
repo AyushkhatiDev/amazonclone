@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapPin, Search, ShoppingCart, ChevronDown, Package, Heart, LogOut, User } from "lucide-react";
 import type { SearchIndexItem, Department } from "@/lib/catalog";
@@ -17,13 +18,25 @@ export function Logo({ className = "" }: { className?: string }) {
   );
 }
 
+function useScrolled() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 4);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+  return scrolled;
+}
+
 export default function Header({ departments }: { departments: Department[] }) {
   const hydrated = useHydrated();
+  const scrolled = useScrolled();
   const count = useStore((s) => s.cart.reduce((n, l) => n + l.qty, 0));
   const account = useAccount();
 
   return (
-    <header className="sticky top-0 z-40 bg-ink text-white">
+    <header className={`sticky top-0 z-40 bg-ink text-white transition-shadow duration-300 ${scrolled ? "shadow-[0_8px_24px_-12px_rgb(0_0_0/0.5)]" : ""}`}>
       <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
         <Logo />
         <PincodeButton />
@@ -37,9 +50,9 @@ export default function Header({ departments }: { departments: Department[] }) {
             <span className="block text-xs text-white/70">Returns</span>
             <span className="text-sm font-semibold">& Orders</span>
           </Link>
-          <Link href="/cart" className="relative flex items-end gap-1 rounded-md px-2 py-1 hover:bg-white/10" aria-label={`Cart, ${hydrated ? count : 0} items`}>
+          <Link href="/cart" id="cart-icon" className="relative flex items-end gap-1 rounded-md px-2 py-1 hover:bg-white/10" aria-label={`Cart, ${hydrated ? count : 0} items`}>
             <ShoppingCart className="h-7 w-7" />
-            <span className="absolute left-5 top-0 min-w-5 rounded-full bg-marigold px-1 text-center text-xs font-bold text-ink">
+            <span key={hydrated ? count : 0} className={`absolute left-5 top-0 min-w-5 rounded-full bg-marigold px-1 text-center text-xs font-bold text-ink ${hydrated && count ? "animate-pop" : ""}`}>
               {hydrated ? count : 0}
             </span>
             <span className="hidden text-sm font-semibold sm:inline">Cart</span>
@@ -206,8 +219,10 @@ function SearchBox({ departments }: { departments: Department[] }) {
         <Search className="h-5 w-5" />
       </button>
 
+      {/* Dim the page (not the header) while suggestions are open, so they read as the focus. */}
+      {open && suggestions.length > 0 && createPortal(<div aria-hidden className="fixed inset-0 z-30 animate-fade-in bg-ink/25" />, document.body)}
       {open && suggestions.length > 0 && (
-        <ul role="listbox" className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-line bg-white py-1 shadow-xl">
+        <ul role="listbox" className="absolute inset-x-0 top-full z-50 mt-1 animate-fade-in overflow-hidden rounded-xl border border-line bg-white py-1 shadow-xl">
           {suggestions.map((s, i) => (
             <li key={s.id} role="option" aria-selected={i === active}>
               <Link

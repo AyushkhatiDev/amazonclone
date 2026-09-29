@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, ChevronLeft, RotateCcw } from "lucide-react";
+import { ChevronLeft, RotateCcw } from "lucide-react";
 import { useAccount, useHydrated, useStore, orderStatus, returnWindow, type CartLine, type Order } from "@/lib/store";
 import { useUI } from "@/lib/ui";
 import { formatINR, formatDay } from "@/lib/pricing";
@@ -42,8 +42,8 @@ export default function OrderDetail({ id }: { id: string }) {
       </Link>
 
       {placed && st.stage !== "Cancelled" && (
-        <div className="mt-4 flex gap-3 rounded-xl border border-save/30 bg-green-50 p-5">
-          <CheckCircle2 className="h-6 w-6 shrink-0 text-save" />
+        <div className="mt-4 flex animate-fade-up gap-4 rounded-xl border border-save/30 bg-green-50 p-5">
+          <DrawnCheck />
           <div>
             <p className="font-semibold text-save">Order placed. Thank you!</p>
             <p className="text-sm">
@@ -129,6 +129,16 @@ export default function OrderDetail({ id }: { id: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+/** A check mark that draws itself: the one moment in the flow that deserves a little ceremony. */
+function DrawnCheck() {
+  return (
+    <svg viewBox="0 0 52 52" className="h-11 w-11 shrink-0" aria-hidden>
+      <circle cx="26" cy="26" r="24" fill="none" stroke="var(--color-save)" strokeWidth="3" strokeDasharray="151" strokeDashoffset="151" style={{ animation: "draw .6s var(--ease-out-soft) forwards" }} />
+      <path d="M15 27l7 7 15-16" fill="none" stroke="var(--color-save)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="40" strokeDashoffset="40" style={{ animation: "draw .45s .45s var(--ease-out-soft) forwards" }} />
+    </svg>
   );
 }
 

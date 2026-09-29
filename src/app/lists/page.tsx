@@ -26,7 +26,7 @@ export default function ListsPage() {
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {wishlist.map((p) => (
-            <div key={p.id} className="card flex flex-col p-4">
+            <div key={p.id} data-product className="card lift flex flex-col p-4">
               <Link href={`/p/${p.slug}`} className="block rounded-lg bg-page p-2">
                 <img src={p.thumbnail} alt={p.title} className="aspect-square w-full object-contain" />
               </Link>

@@ -4,13 +4,14 @@ import Stars from "./Stars";
 import Price from "./Price";
 import DeliveryLine from "./DeliveryLine";
 import AddToCart from "./AddToCart";
+import Img from "./Img";
 import { snap } from "@/lib/snap";
 
 export default function ProductCard({ p }: { p: Product }) {
   return (
-    <div className="card group flex flex-col overflow-hidden transition hover:shadow-md">
+    <div data-product className="card lift group flex flex-col overflow-hidden">
       <Link href={`/p/${p.slug}`} className="block bg-page/60 p-4">
-        <img src={p.thumbnail} alt={p.title} loading="lazy" className="mx-auto aspect-square w-full object-contain transition group-hover:scale-[1.03]" />
+        <Img src={p.thumbnail} alt={p.title} loading="lazy" className="mx-auto aspect-square w-full object-contain transition-transform duration-500 group-hover:scale-105" />
       </Link>
       <div className="flex flex-1 flex-col gap-1.5 p-4 pt-3">
         {p.brand && <span className="text-xs font-medium uppercase tracking-wide text-muted">{p.brand}</span>}

@@ -187,7 +187,7 @@ export default function Assistant() {
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-label="Ask Bazaar">
-      <div className="absolute inset-0 hidden bg-ink/20 sm:block" onClick={() => setOpen(false)} />
+      <div className="absolute inset-0 hidden animate-fade-in bg-ink/20 sm:block" onClick={() => setOpen(false)} />
       <aside className="relative flex h-full w-full flex-col bg-white shadow-2xl sm:max-w-md animate-[slide_.2s_ease-out]">
         <header className="flex items-center gap-2 border-b border-line px-4 py-3">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-soft text-brand">
@@ -334,7 +334,7 @@ function AssistantText({ text, streaming, products }: { text: string; streaming:
 
 function MiniCard({ p }: { p: Snap }) {
   return (
-    <div className="card flex w-44 shrink-0 snap-start flex-col p-2.5">
+    <div data-product className="card flex w-44 shrink-0 snap-start flex-col p-2.5">
       <Link href={`/p/${p.slug}`} className="block rounded-lg bg-page p-1.5">
         <img src={p.thumbnail} alt="" className="aspect-square w-full object-contain" />
       </Link>

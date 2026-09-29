@@ -41,7 +41,7 @@ function MiniRow({ icon, title, items, withAdd }: { icon: React.ReactNode; title
       </h2>
       <div className="flex gap-3 overflow-x-auto pb-1">
         {items.map((p) => (
-          <div key={p.id} className="w-28 shrink-0">
+          <div key={p.id} data-product className="w-28 shrink-0">
             <Link href={`/p/${p.slug}`} className="block rounded-lg bg-page p-2">
               <img src={p.thumbnail} alt={p.title} className="aspect-square w-full object-contain" />
             </Link>

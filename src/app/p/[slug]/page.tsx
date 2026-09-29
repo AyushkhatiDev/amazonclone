@@ -39,7 +39,7 @@ export default async function ProductPage({ params }: PageProps<"/p/[slug]">) {
         <Link href={`/s?dept=${dept.slug}&cat=${p.category}`} className="hover:text-brand hover:underline">{p.categoryName}</Link>
       </nav>
 
-      <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_320px]">
+      <div data-product className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_320px]">
         <Gallery images={p.images} title={p.title} />
 
         <div>
