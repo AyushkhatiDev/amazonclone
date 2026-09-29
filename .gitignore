@@ -1,0 +1,7 @@
+node_modules/
+.next/
+.env*
+.vercel
+.DS_Store
+.claude/hooks/.capture.lock
+.claude/settings.local.json
