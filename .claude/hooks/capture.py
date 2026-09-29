@@ -138,40 +138,76 @@ def entry_text(kind, num, session_id, ts, model, body):
     )
 
 
-def append(path, session_id, new_entries):
+def state_path(session_id):
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".state")
+    os.makedirs(d, exist_ok=True)
+    return os.path.join(d, f"{session_id}.json")
+
+
+def load_state(session_id, path):
+    """Counters live in a sidecar file, not in the markdown: prompts can quote log entries
+    (the brief does, and so does pasted output from another session), so re-parsing the log
+    miscounts. The regex scan is only a fallback for a log that predates the state file."""
+    sp = state_path(session_id)
+    if os.path.exists(sp):
+        with open(sp) as f:
+            return json.load(f)
+    st = {"last_prompt_num": 0, "prompt_count": 0, "last_response_num": 0,
+          "first_prompt_time": "", "last_prompt_time": "", "models": [], "pending_model": None}
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            found = ENTRY_RE.findall(f.read())
+        for kind, num, ts, model in found:
+            if kind == "PROMPT":
+                st["last_prompt_num"] = max(st["last_prompt_num"], int(num))
+                st["prompt_count"] += 1
+                st["first_prompt_time"] = st["first_prompt_time"] or ts
+                st["last_prompt_time"] = ts
+            else:
+                st["last_response_num"] = max(st["last_response_num"], int(num))
+            if model != "unknown" and model not in st["models"]:
+                st["models"].append(model)
+    return st
+
+
+def save_state(session_id, st):
+    sp = state_path(session_id)
+    with open(sp + ".tmp", "w") as f:
+        json.dump(st, f, indent=2)
+    os.replace(sp + ".tmp", sp)
+
+
+def note_prompt(st, num, ts, model):
+    st["last_prompt_num"] = num
+    st["prompt_count"] += 1
+    st["first_prompt_time"] = st["first_prompt_time"] or ts
+    st["last_prompt_time"] = ts
+    note_model(st, model)
+
+
+def note_model(st, model):
+    if model and model != "unknown" and model not in st["models"]:
+        st["models"].append(model)
+
+
+def append(path, session_id, new_entries, st):
     """Append entries and refresh the frontmatter; entry bodies are never rewritten."""
     body = ""
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             content = f.read()
-        idx = content.find("\n[LOG_ENTRY")
+        idx = content.find("\n[LOG_ENTRY")  # first occurrence is always a real entry
         body = content[idx:] if idx >= 0 else ""
     body = body.rstrip("\n") + "".join(new_entries)
-    found = ENTRY_RE.findall(body)
-    prompts = [(ts, m) for kind, _, ts, m in found if kind == "PROMPT"]
-    models = [m for _, _, _, m in found]
-    distinct = [m for i, m in enumerate(models) if m not in models[:i] and m != "unknown"]
-    header = render_header(
-        session_id,
-        ", ".join(distinct) or "unknown",
-        len(prompts),
-        prompts[0][0] if prompts else "",
-        prompts[-1][0] if prompts else "",
-    )
+    header = render_header(session_id, ", ".join(st["models"]) or "unknown", st["prompt_count"],
+                           st["first_prompt_time"], st["last_prompt_time"])
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(header + ("\n" + body.lstrip("\n") if body else ""))
     os.replace(tmp, path)
 
 
-def count(path, kind):
-    if not os.path.exists(path):
-        return 0
-    with open(path, encoding="utf-8") as f:
-        return sum(1 for k, *_ in ENTRY_RE.findall(f.read()) if k == kind)
-
-
-def backfill(session_id, entries):
+def backfill(session_id, entries, st):
     """If the hook was installed mid-session, recover the earlier exchanges from the transcript."""
     out, num = [], 0
     prompt_idxs = [i for i, e in enumerate(entries) if is_real_prompt(e)]
@@ -184,10 +220,13 @@ def backfill(session_id, entries):
         model = latest_model(seg) or latest_model(entries[:i]) or "unknown"
         out.append(entry_text("PROMPT", num, session_id, e.get("timestamp"), model,
                               "(backfilled from session transcript: hook installed mid-session)\n\n" + text))
+        note_prompt(st, num, e.get("timestamp"), model)
         resp, ts, rmodel = final_response(seg)
         if resp:
             out.append(entry_text("RESPONSE", num, session_id, ts, rmodel or model,
                                   "(backfilled from session transcript: hook installed mid-session)\n\n" + resp))
+            st["last_response_num"] = num
+            note_model(st, rmodel)
     return out, num
 
 
@@ -199,22 +238,27 @@ def handle(mode, data):
     path = session_file(d, session_id)
     transcript = data.get("transcript_path")
 
+    st = load_state(session_id, path)
+
     if mode == "prompt":
         entries = read_transcript(transcript)
         new = []
         if not os.path.exists(path):
             # The current prompt is not yet in the transcript when this hook runs,
             # so anything already there is from before the hook was installed.
-            new, _ = backfill(session_id, entries)
-        num = count(path, "PROMPT") + sum(1 for x in new if "type=PROMPT" in x) + 1
+            new, _ = backfill(session_id, entries, st)
+        num = st["last_prompt_num"] + 1
         model = data.get("model")
         if isinstance(model, dict):
             model = model.get("id") or model.get("display_name")
-        if not model:
-            model = latest_model(entries)
-        model = model or os.environ.get("ANTHROPIC_MODEL") or "unknown"
-        new.append(entry_text("PROMPT", num, session_id, now_iso(), model, data.get("prompt", "")))
-        append(path, session_id, new)
+        model = model or latest_model(entries) or os.environ.get("ANTHROPIC_MODEL") or "unknown"
+        ts = now_iso()
+        entry = entry_text("PROMPT", num, session_id, ts, model, data.get("prompt", ""))
+        # Remember the exact header so the Stop hook can fill in an unknown model on this turn.
+        st["pending_model"] = entry.lstrip("\n").split("\n\n", 1)[0] if model == "unknown" else None
+        note_prompt(st, num, ts, model)
+        append(path, session_id, new + [entry], st)
+        save_state(session_id, st)
 
     elif mode == "response":
         resp, ts, model = "", None, None
@@ -228,28 +272,33 @@ def handle(mode, data):
             time.sleep(0.25)
         if not os.path.exists(path):
             # Hook installed mid-turn: the prompt hook never ran, so rebuild from the transcript.
-            new, _ = backfill(session_id, entries)
+            new, _ = backfill(session_id, entries, st)
             if new:
-                append(path, session_id, new)
+                append(path, session_id, new, st)
+                save_state(session_id, st)
             return
         if not resp:
             resp = data.get("last_assistant_message") or "(no text response captured for this turn)"
-        num = count(path, "PROMPT") or 1
-        if count(path, "RESPONSE") >= num:
+        num = st["last_prompt_num"] or 1
+        if st["last_response_num"] >= num:
             return  # already logged (e.g. Stop fired twice for the same turn)
         model = model or latest_model(entries) or "unknown"
-        # On the first prompt of a session no model is known yet at prompt time; the hook
-        # fills it in on this same turn's PROMPT entry once the response reveals it.
-        with open(path, encoding="utf-8") as f:
-            content = f.read()
-        last = [m for m in ENTRY_RE.finditer(content) if m.group(1) == "PROMPT" and m.group(2) == str(num)]
-        if last and last[-1].group(4) == "unknown" and model != "unknown":
-            m = last[-1]
-            content = content[:m.start(4)] + model + content[m.end(4):]
-            with open(path + ".tmp", "w", encoding="utf-8") as f:
-                f.write(content)
-            os.replace(path + ".tmp", path)
-        append(path, session_id, [entry_text("RESPONSE", num, session_id, now_iso(), model, resp)])
+        pending = st.get("pending_model")
+        if pending and model != "unknown":
+            # First prompt of a session: the model only becomes known once the response exists.
+            with open(path, encoding="utf-8") as f:
+                content = f.read()
+            i = content.find(pending)  # first occurrence is the real entry, never a later quote
+            if i >= 0:
+                fixed = pending.replace("\nmodel: unknown", f"\nmodel: {model}")
+                with open(path + ".tmp", "w", encoding="utf-8") as f:
+                    f.write(content[:i] + fixed + content[i + len(pending):])
+                os.replace(path + ".tmp", path)
+        st["pending_model"] = None
+        st["last_response_num"] = num
+        note_model(st, model)
+        append(path, session_id, [entry_text("RESPONSE", num, session_id, now_iso(), model, resp)], st)
+        save_state(session_id, st)
 
 
 def main():
