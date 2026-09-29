@@ -9,7 +9,7 @@ Bazaar rebuilds Amazon's core shopping loop: search, product, cart, checkout, or
 ## Try it in two minutes
 
 1. Search from the header. Suggestions appear as you type, and `/` focuses the search box from anywhere. Filter by department, rating, price or "arrives in 2 days".
-2. Open a product. It has one price, a delivery date, the return window, a comparison with similar items, and reviews you can filter by star rating.
+2. Open a product. It has one price, a verdict on whether now is a good time to buy (backed by a 90-day price chart), a delivery date, the return window, a comparison with similar items, and reviews you can filter by star rating.
 3. Add to cart. A drawer confirms it and you keep browsing. The cart shows the final total, including delivery.
 4. Check out and choose **Continue with the demo account**. Pick UPI, card or cash on delivery (card and UPI are simulated), then place the order.
 5. Open **Ask Bazaar** from the header and try "Stock my kitchen for under ₹3,000" or, on a product page, "Is this worth it compared to similar ones?".
@@ -26,6 +26,7 @@ Bazaar rebuilds Amazon's core shopping loop: search, product, cart, checkout, or
 | Price shown twice, "-30%" off an M.R.P. | One price, with the saving shown in rupees |
 | Menu opens with Prime Video, Alexa, Fire TV | Navigation lists shopping categories only |
 | Buy it again / recent history below six banners | Your history comes first on the home page |
+| "Price history" is a pill that links elsewhere | A verdict ("lowest in 90 days" / "higher than usual") next to the price, backed by a 90-day chart |
 | Rufus: generic prompts, text-heavy answers | Ask Bazaar: grounded in the catalog, knows the page and your cart, answers with live product cards and one-tap bundles |
 
 Full reasoning, and what was deliberately cut, is in [PRODUCT.md](PRODUCT.md).

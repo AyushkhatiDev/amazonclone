@@ -16,6 +16,8 @@
   --color-page: #f3f4f6;
   --color-line: #e5e7eb;
   --color-muted: #6b7280;
+  /* Chart series colour: brand teal, nudged to pass the chroma floor (dataviz validator) */
+  --color-chart: #0a8468;
 }
 
 body {

@@ -82,7 +82,7 @@ function suggestionsFor(path: string, cartCount: number): string[] {
       "Is this worth it compared to similar ones?",
       "What do reviewers say about it?",
       "Can I return it if it doesn't suit me?",
-      "When would it arrive?",
+      "Is now a good time to buy, or should I wait?",
     ];
   }
   if (path.startsWith("/cart") || path.startsWith("/checkout")) {

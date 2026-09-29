@@ -11,6 +11,7 @@ import DeliveryLine from "@/components/DeliveryLine";
 import Reviews from "@/components/Reviews";
 import RecordView from "@/components/RecordView";
 import MobileBuyBar from "@/components/MobileBuyBar";
+import PriceHistory, { PriceVerdictChip } from "@/components/PriceHistory";
 import { snap } from "@/lib/snap";
 
 export function generateStaticParams() {
@@ -63,6 +64,7 @@ export default async function ProductPage({ params }: PageProps<"/p/[slug]">) {
               </p>
             )}
             <p className="mt-1 text-xs text-muted">Includes GST. Delivery fees are shown below. There are no other charges.</p>
+            <PriceVerdictChip id={p.id} price={p.price} mrp={p.mrp} />
           </div>
 
           <h2 className="font-semibold">About this item</h2>
@@ -103,6 +105,8 @@ export default async function ProductPage({ params }: PageProps<"/p/[slug]">) {
           </div>
         </aside>
       </div>
+
+      <PriceHistory id={p.id} price={p.price} mrp={p.mrp} />
 
       {others.length > 0 && (
         <section className="mt-12">

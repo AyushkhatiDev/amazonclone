@@ -5,6 +5,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { search, getProduct, departments, type Product, type SortKey } from "./catalog";
 import { snap, type Snap } from "./snap";
+import { priceHistory, priceStats } from "./priceHistory";
 import { FREE_DELIVERY_THRESHOLD, STANDARD_DELIVERY_FEE, EXPRESS_FEE, COD_LIMIT } from "./pricing";
 
 export const MODEL = "claude-opus-5-5";
@@ -27,6 +28,7 @@ Showing products (the app turns these markers into interactive cards; always put
 Store rules you can rely on:
 - Delivery is free on orders of ₹${FREE_DELIVERY_THRESHOLD} or more, otherwise ₹${STANDARD_DELIVERY_FEE}. Express delivery costs ₹${EXPRESS_FEE} flat. There are no other fees.
 - Cash on delivery is available for orders up to ₹${COD_LIMIT.toLocaleString("en-IN")}. UPI and cards have no limit.
+- Price history: get_product_details includes each product's 90-day low, high, average and a verdict. Use it for "is now a good time to buy?"; the product page shows the same chart (it is simulated for this demo).
 - Returns: each product has its own return window (some are not returnable); pickup is free. Orders can be cancelled until they ship.
 - The shopper can see the page they're on; its details arrive in <page_context> with each message. Use it for questions like "is this returnable?" or "how do I get free delivery?".
 
@@ -152,6 +154,9 @@ export function runTool(name: string, input: unknown): { result: string; product
           tags: p.tags,
           ratings_by_star: { 5: p.ratings.counts[4], 4: p.ratings.counts[3], 3: p.ratings.counts[2], 2: p.ratings.counts[1], 1: p.ratings.counts[0] },
           reviews: p.reviews.map((r) => ({ rating: r.rating, comment: r.comment, date: r.date.slice(0, 10) })),
+          price_last_90_days: (({ low, high, avg, lowPoint, verdict }) => ({ low, high, average: avg, low_was_days_ago: lowPoint.daysAgo, verdict }))(
+            priceStats(priceHistory(p.id, p.price, p.mrp)),
+          ),
         })),
       ),
       products: found.map(snap),
