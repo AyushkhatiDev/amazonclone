@@ -46,7 +46,7 @@ export default function CartPage() {
                         </div>
                       </div>
                       <div className="mt-1 space-y-0.5 text-sm">
-                        <DeliveryLine days={item.deliveryDays} price={FREE_DELIVERY_THRESHOLD} compact />
+                        <DeliveryLine days={item.deliveryDays} price={item.price} compact dateOnly />
                         <p className="text-muted">{item.returnDays ? `Returnable within ${item.returnDays} days` : "Not returnable"}</p>
                       </div>
                       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">

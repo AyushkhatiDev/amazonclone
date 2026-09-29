@@ -10,6 +10,7 @@ import BuyBox from "@/components/BuyBox";
 import DeliveryLine from "@/components/DeliveryLine";
 import Reviews from "@/components/Reviews";
 import RecordView from "@/components/RecordView";
+import MobileBuyBar from "@/components/MobileBuyBar";
 import { snap } from "@/lib/snap";
 
 export function generateStaticParams() {
@@ -85,7 +86,7 @@ export default async function ProductPage({ params }: PageProps<"/p/[slug]">) {
         </div>
 
         <aside className="lg:sticky lg:top-32 lg:self-start">
-          <div className="card p-5">
+          <div id="buy-box" className="card p-5">
             <p className="text-2xl font-semibold">{formatINR(p.price)}</p>
             <div className="mt-3">
               <DeliveryLine days={p.deliveryDays} price={p.price} />
@@ -135,6 +136,7 @@ export default async function ProductPage({ params }: PageProps<"/p/[slug]">) {
         </section>
       )}
 
+      <MobileBuyBar product={snap(p)} />
       <Reviews rating={p.rating} ratings={p.ratings} reviews={p.reviews} />
     </div>
   );

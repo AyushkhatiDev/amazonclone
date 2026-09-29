@@ -12,40 +12,28 @@ export default function Home() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-4">
-      <section className="mt-6 overflow-hidden rounded-2xl bg-gradient-to-br from-brand to-brand-dark text-white">
-        <div className="grid items-center gap-6 p-6 sm:p-10 md:grid-cols-[1.2fr_1fr]">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Shopping, minus the noise.</h1>
-            <p className="mt-3 max-w-lg text-white/85">
-              The price in your cart is the price you pay. Results are ranked by what fits your search, never by who paid to be there.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/s?sort=discount" className="btn bg-white text-ink hover:bg-white/90">
-                Today&apos;s deals
-              </Link>
-              <Link href="/s?fast=1" className="btn border border-white/40 hover:bg-white/10">
-                Arrives in 2 days
-              </Link>
-            </div>
-          </div>
-          <ul className="grid gap-3 text-sm">
-            <Promise icon={<Receipt className="h-5 w-5" />} title="No surprise fees" body="Delivery is shown in the cart. The total never changes at checkout." />
-            <Promise icon={<BadgeCheck className="h-5 w-5" />} title="No sponsored results" body="Nothing on Bazaar is an ad." />
-            <Promise icon={<ShieldCheck className="h-5 w-5" />} title="Returns in two taps" body="Start a return from Your Orders. The deadline is shown on every item." />
-          </ul>
+      <section className="mt-5 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-brand to-brand-dark px-6 py-5 text-white lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Shopping, minus the noise.</h1>
+          <p className="text-sm text-white/80">The price in your cart is the price you pay, and nothing here is an ad.</p>
         </div>
+        <ul className="hidden flex-wrap gap-2 text-sm sm:flex">
+          <Pill icon={<Receipt className="h-4 w-4" />} label="No surprise fees" />
+          <Pill icon={<BadgeCheck className="h-4 w-4" />} label="No sponsored results" />
+          <Pill icon={<ShieldCheck className="h-4 w-4" />} label="Returns in two taps" />
+        </ul>
       </section>
 
       <ForYou />
 
-      <section className="mt-10">
+      <section className="mt-8">
         <h2 className="mb-3 text-xl font-bold tracking-tight">Shop by department</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:grid-cols-8">
           {departments.map((d) => (
-            <Link key={d.slug} href={`/s?dept=${d.slug}`} className="card group p-3 text-center transition hover:shadow-md">
+            <Link key={d.slug} href={`/s?dept=${d.slug}`} className="card group p-1.5 text-center transition hover:shadow-md sm:p-3">
               <img src={d.image} alt="" className="mx-auto aspect-square w-full rounded-lg bg-page object-contain p-2 transition group-hover:scale-105" />
-              <p className="mt-2 text-sm font-medium">{d.name}</p>
-              <p className="text-xs text-muted">{d.count} products</p>
+              <p className="mt-1.5 text-[11px] font-medium leading-tight sm:mt-2 sm:text-sm">{d.name}</p>
+              <p className="hidden text-xs text-muted sm:block">{d.count} products</p>
             </Link>
           ))}
         </div>
@@ -59,14 +47,10 @@ export default function Home() {
   );
 }
 
-function Promise({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+function Pill({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <li className="flex gap-3 rounded-xl bg-white/10 p-4 backdrop-blur">
-      <span className="mt-0.5">{icon}</span>
-      <span>
-        <span className="block font-semibold">{title}</span>
-        <span className="text-white/80">{body}</span>
-      </span>
+    <li className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5">
+      {icon} {label}
     </li>
   );
 }

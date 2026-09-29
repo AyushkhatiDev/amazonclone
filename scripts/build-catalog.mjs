@@ -5,6 +5,13 @@ import fs from "node:fs";
 
 const USD_TO_INR = 88;
 
+// Use the mirrored copy in public/img when scripts/fetch-images.mjs has fetched it.
+const PREFIX = "https://cdn.dummyjson.com/product-images/";
+const img = (url) => {
+  const local = "/img/" + url.slice(PREFIX.length).replace(/[^A-Za-z0-9./-]/g, "-");
+  return url.startsWith(PREFIX) && fs.existsSync("public" + local) ? local : url;
+};
+
 const DEPARTMENTS = [
   { slug: "mobiles", name: "Mobiles & Tablets", categories: ["smartphones", "tablets", "mobile-accessories"] },
   { slug: "laptops", name: "Laptops", categories: ["laptops"] },
@@ -96,8 +103,8 @@ const products = src
       tags: p.tags,
       weight: p.weight,
       dimensions: p.dimensions,
-      images: p.images,
-      thumbnail: p.thumbnail,
+      images: p.images.map(img),
+      thumbnail: img(p.thumbnail),
       reviews: p.reviews.map((r) => ({ rating: r.rating, comment: r.comment, date: r.date, name: r.reviewerName })),
     };
   });
