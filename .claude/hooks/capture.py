@@ -23,6 +23,12 @@ AUTHOR = "Ayushkhatidev"
 TOOL = "claude-code"
 PROJECT = "amazonclone"
 
+# A real entry header is a whole line followed by timestamp/model lines. Anchoring matters:
+# prompts can quote example log entries (the 8x brief does), which must not be counted.
+ENTRY_RE = re.compile(
+    r"^\[LOG_ENTRY type=(PROMPT|RESPONSE) num=(\d+) session=\S+\]\ntimestamp: (\S+)\nmodel: (\S+)$", re.M
+)
+
 
 def now_iso():
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
@@ -141,8 +147,9 @@ def append(path, session_id, new_entries):
         idx = content.find("\n[LOG_ENTRY")
         body = content[idx:] if idx >= 0 else ""
     body = body.rstrip("\n") + "".join(new_entries)
-    prompts = re.findall(r"\[LOG_ENTRY type=PROMPT num=\d+[^\]]*\]\ntimestamp: (\S+)\nmodel: (\S+)", body)
-    models = re.findall(r"\[LOG_ENTRY type=\w+ num=\d+[^\]]*\]\ntimestamp: \S+\nmodel: (\S+)", body)
+    found = ENTRY_RE.findall(body)
+    prompts = [(ts, m) for kind, _, ts, m in found if kind == "PROMPT"]
+    models = [m for _, _, _, m in found]
     distinct = [m for i, m in enumerate(models) if m not in models[:i] and m != "unknown"]
     header = render_header(
         session_id,
@@ -161,7 +168,7 @@ def count(path, kind):
     if not os.path.exists(path):
         return 0
     with open(path, encoding="utf-8") as f:
-        return len(re.findall(rf"\[LOG_ENTRY type={kind} num=", f.read()))
+        return sum(1 for k, *_ in ENTRY_RE.findall(f.read()) if k == kind)
 
 
 def backfill(session_id, entries):
@@ -235,15 +242,13 @@ def handle(mode, data):
         # fills it in on this same turn's PROMPT entry once the response reveals it.
         with open(path, encoding="utf-8") as f:
             content = f.read()
-        marker = f"[LOG_ENTRY type=PROMPT num={num} "
-        i = content.rfind(marker)
-        if i >= 0 and model != "unknown":
-            j = content.find("\nmodel: unknown\n", i)
-            if j >= 0 and j < content.find("\n\n", content.find("\ntimestamp:", i)):
-                content = content[:j] + f"\nmodel: {model}\n" + content[j + len("\nmodel: unknown\n"):]
-                with open(path + ".tmp", "w", encoding="utf-8") as f:
-                    f.write(content)
-                os.replace(path + ".tmp", path)
+        last = [m for m in ENTRY_RE.finditer(content) if m.group(1) == "PROMPT" and m.group(2) == str(num)]
+        if last and last[-1].group(4) == "unknown" and model != "unknown":
+            m = last[-1]
+            content = content[:m.start(4)] + model + content[m.end(4):]
+            with open(path + ".tmp", "w", encoding="utf-8") as f:
+                f.write(content)
+            os.replace(path + ".tmp", path)
         append(path, session_id, [entry_text("RESPONSE", num, session_id, now_iso(), model, resp)])
 
 
